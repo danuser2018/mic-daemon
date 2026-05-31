@@ -19,7 +19,7 @@ Los cambios se agrupan en las siguientes categorías:
 
 ---
 
-## [Sin publicar]
+## [1.0.0] - 2026-05-31
 
 ### Añadido
 
@@ -39,6 +39,8 @@ Los cambios se agrupan en las siguientes categorías:
 - Tests unitarios en `tests/`: `test_config.py`, `test_recorder.py`, `test_state_watcher.py`. Sin dependencia de hardware de audio (mocks completos).
 - Prompt de desarrollo en `docs/prompts/initial-implementation.md` para trazabilidad del uso de IA.
 - Workflow de GitHub Actions (`pr-tests.yml`) para la ejecución automática de tests en Pull Requests hacia la rama `main`.
+
+## Sin publicar
 
 ---
 

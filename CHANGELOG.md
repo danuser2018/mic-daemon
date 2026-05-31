@@ -28,6 +28,15 @@ Los cambios se agrupan en las siguientes categorías:
   desarrollo asistido con IA.
 - Fichero `CHANGELOG.md` con el formato Keep a Changelog v1.1.0 en castellano.
 - Se completa `README.md` con la información de arquitectura, máquina de estados, etc.
+- Módulo `src/config.py`: carga y validación de variables de entorno con dataclass `Config`.
+- Módulo `src/recorder.py`: captura de audio con `sounddevice.InputStream` y escritura WAV con `soundfile`. Buffer en memoria; guarda parcial ante errores.
+- Módulo `src/state_watcher.py`: bucle de polling del archivo `recording.flag` con callbacks `on_start` / `on_stop` desacoplados de la lógica de audio.
+- Módulo `src/mic_daemon.py`: punto de entrada del daemon; orquestación de módulos, manejo de SIGTERM y limpieza de flag obsoleto al arrancar.
+- Scripts de control en `scripts/`: `mic-toggle.sh` (modo toggle), `mic-start.sh` y `mic-stop.sh` (modo push-to-talk).
+- Unidad de servicio `systemd/mic-daemon.service` lista para instalar con `systemctl --user`.
+- `requirements.txt` con dependencias (`sounddevice`, `soundfile`, `numpy`, `pytest`, `pytest-cov`).
+- Tests unitarios en `tests/`: `test_config.py`, `test_recorder.py`, `test_state_watcher.py`. Sin dependencia de hardware de audio (mocks completos).
+- Prompt de desarrollo en `docs/prompts/initial-implementation.md` para trazabilidad del uso de IA.
 
 ---
 

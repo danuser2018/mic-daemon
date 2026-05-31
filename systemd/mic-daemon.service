@@ -1,0 +1,17 @@
+[Unit]
+Description=Microphone recording daemon controlled by filesystem flag
+Documentation=https://github.com/danuser2018/mic-daemon
+After=default.target pipewire.service pipewire-pulse.service
+
+[Service]
+Type=simple
+EnvironmentFile=%h/.config/mic-daemon/env
+ExecStart=%h/workspace/mic-daemon/.venv/bin/python -m src.mic_daemon
+WorkingDirectory=%h/workspace/mic-daemon
+Restart=on-failure
+RestartSec=3s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

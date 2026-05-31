@@ -23,6 +23,7 @@ Los cambios se agrupan en las siguientes categorías:
 
 ### Añadido
 
+
 - Fichero `CONTRIBUTING.md` con el flujo de trabajo Trunk Based Development,
   convenciones de commits, guía de Pull Requests y buenas prácticas para
   desarrollo asistido con IA.
@@ -37,6 +38,7 @@ Los cambios se agrupan en las siguientes categorías:
 - `requirements.txt` con dependencias (`sounddevice`, `soundfile`, `numpy`, `pytest`, `pytest-cov`).
 - Tests unitarios en `tests/`: `test_config.py`, `test_recorder.py`, `test_state_watcher.py`. Sin dependencia de hardware de audio (mocks completos).
 - Prompt de desarrollo en `docs/prompts/initial-implementation.md` para trazabilidad del uso de IA.
+- Workflow de GitHub Actions (`pr-tests.yml`) para la ejecución automática de tests en Pull Requests hacia la rama `main`.
 
 ---
 

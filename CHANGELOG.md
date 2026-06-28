@@ -19,6 +19,13 @@ Los cambios se agrupan en las siguientes categorías:
 
 ---
 
+## Sin publicar
+
+### Añadido
+
+- Nueva carpeta `.agents/skills` con la información necesaria para implementación por IA.
+ 
+
 ## [1.0.0] - 2026-05-31
 
 ### Añadido
@@ -40,7 +47,6 @@ Los cambios se agrupan en las siguientes categorías:
 - Prompt de desarrollo en `docs/prompts/initial-implementation.md` para trazabilidad del uso de IA.
 - Workflow de GitHub Actions (`pr-tests.yml`) para la ejecución automática de tests en Pull Requests hacia la rama `main`.
 
-## Sin publicar
 
 ---
 

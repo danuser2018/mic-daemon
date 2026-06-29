@@ -24,7 +24,13 @@ Los cambios se agrupan en las siguientes categorías:
 ### Añadido
 
 - Nueva carpeta `.agents/skills` con la información necesaria para implementación por IA.
- 
+
+### Corregido
+
+- Corregida la discrepancia de ruta en el servicio systemd (`mic-daemon.service`) y las instrucciones de instalación en el `README.md`.
+- Eliminadas las referencias a la dependencia `watchdog` en la documentación para reflejar que el daemon utiliza únicamente polling activo.
+- Añadida la dependencia `numpy` a la lista de requisitos del `README.md`.
+- Corregida la URL de comparación `[Sin publicar]` al final del `CHANGELOG.md`.
 
 ## [1.0.0] - 2026-05-31
 
@@ -74,4 +80,5 @@ Los cambios se agrupan en las siguientes categorías:
 
 -->
 
-[Sin publicar]: https://github.com/danuser2018/tts-capability/compare/HEAD...HEAD
+[Sin publicar]: https://github.com/danuser2018/mic-daemon/compare/HEAD...HEAD
+

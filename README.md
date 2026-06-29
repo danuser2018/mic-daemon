@@ -55,7 +55,7 @@ El principio central de diseño es **"filesystem como máquina de estado"**: el 
 │        │                                                        │
 │        ▼                                                        │
 │   mic-daemon (servicio systemd --user)                         │
-│        │  observa el flag (polling o watchdog)                  │
+│        │  observa el flag (polling periódico)                   │
 │        │  captura audio → sounddevice / PyAudio                │
 │        │  escribe .wav → $MIC_OUTPUT_DIR                       │
 │        ▼                                                        │
@@ -120,7 +120,7 @@ El daemon opera con tres estados internos bien definidos:
 2. mic-toggle.sh ejecutado
 3. ¿Existe recording.flag?  →  NO
 4. Crear /tmp/voice_assistant/recording.flag
-5. daemon detecta flag (próximo ciclo de poll o evento watchdog)
+5. daemon detecta flag (próximo ciclo de poll)
 6. daemon: IDLE → RECORDING
 7. Abrir stream de audio (sounddevice.InputStream)
 8. Acumular frames en buffer en memoria
@@ -246,7 +246,7 @@ mic-daemon/
 ├── src/
 │   ├── mic_daemon.py            # Punto de entrada principal del daemon
 │   ├── recorder.py              # Lógica de captura y escritura de audio
-│   ├── state_watcher.py         # Observador del archivo de estado (poll / watchdog)
+│   ├── state_watcher.py         # Observador del archivo de estado (polling periódico)
 │   └── config.py                # Carga y validación de variables de entorno
 │
 ├── scripts/
@@ -281,7 +281,7 @@ mic-daemon/
 ```
 sounddevice>=0.4.6      # Captura de audio (wrapper de PortAudio)
 soundfile>=0.12.1       # Escritura de archivos WAV/FLAC/OGG
-watchdog>=4.0.0         # (Opcional) Observación de eventos de filesystem
+numpy>=1.24.0           # Manipulación y almacenamiento de buffers de audio
 ```
 
 > **Nota:** `sounddevice` requiere que `libportaudio2` esté instalado en el sistema.
@@ -306,6 +306,8 @@ sudo dnf install portaudio python3-pip
 ### 1. Clonar el repositorio
 
 ```bash
+mkdir -p ~/workspace
+cd ~/workspace
 git clone https://github.com/danuser2018/mic-daemon.git
 cd mic-daemon
 ```
@@ -398,7 +400,8 @@ After=default.target pipewire.service pipewire-pulse.service
 [Service]
 Type=simple
 EnvironmentFile=%h/.config/mic-daemon/env
-ExecStart=/home/%u/mic-daemon/.venv/bin/python /home/%u/mic-daemon/src/mic_daemon.py
+ExecStart=%h/workspace/mic-daemon/.venv/bin/python -m src.mic_daemon
+WorkingDirectory=%h/workspace/mic-daemon
 Restart=on-failure
 RestartSec=3s
 StandardOutput=journal
@@ -554,13 +557,13 @@ La separación de responsabilidades es fundamental:
 
 Esta separación hace que cada capa sea reemplazable de forma independiente. El gestor de hotkeys puede cambiar (sxhkd → KDE → GNOME) sin tocar el daemon. El daemon puede cambiar (Python → C → Rust) sin tocar los scripts.
 
-### ¿Por qué polling en lugar de inotify/watchdog como mecanismo principal?
+### ¿Por qué polling en lugar de inotify/watchdog?
 
 El polling a 100 ms introduce una latencia máxima de 100 ms en el inicio de la grabación, lo cual es imperceptible para el usuario. A cambio:
 
-- El código es trivial y sin dependencias adicionales.
+- El código es trivial y sin dependencias adicionales de terceros.
 - No hay riesgo de perder eventos (el flag persiste hasta que el daemon lo procesa).
-- `watchdog` se ofrece como opción opcional para quienes prefieran latencia mínima garantizada.
+- Se evitan dependencias de monitorización de eventos nativos del sistema de ficheros (como `watchdog` o inotify) que añadirían complejidad y consumo de recursos innecesarios.
 
 ---
 

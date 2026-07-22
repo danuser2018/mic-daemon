@@ -218,14 +218,16 @@ fi
 ### Modo Push-to-Talk
 
 ```bash
-# Al presionar → inicia grabación (crea flag)
-# Al soltar    → detiene grabación (elimina flag)
+# Al presionar → emite "novactl start-capture" e inicia grabación (crea flag)
+# Al soltar    → emite "novactl stop-capture" y detiene grabación (elimina flag)
 
 # mic-start.sh
+novactl start-capture
 mkdir -p /tmp/voice_assistant
 touch /tmp/voice_assistant/recording.flag
 
 # mic-stop.sh
+novactl stop-capture
 rm -f /tmp/voice_assistant/recording.flag
 ```
 

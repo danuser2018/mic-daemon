@@ -53,6 +53,10 @@ class Recorder:
     # Public API
     # ------------------------------------------------------------------
 
+    def is_recording(self) -> bool:
+        """Return True if recording is currently active."""
+        return self._stream is not None
+
     def start(self, output_path: Path) -> None:
         """
         Open the audio stream and begin accumulating frames in memory.

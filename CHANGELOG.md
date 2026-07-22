@@ -17,7 +17,31 @@ Los cambios se agrupan en las siguientes categorías:
 - **Corregido** — corrección de errores.
 - **Seguridad** — correcciones de vulnerabilidades.
 
----
+## [1.2.0]
+
+### Añadido
+
+- Módulo `src/event_subscriber.py` para la gestión de suscripciones asíncronas a NATS (`StartSpeechCaptureCommand` y `StopSpeechCaptureCommand`) a través de `nova-event-bus`.
+- Soporte para la variable de entorno `NATS_URL` en `src/config.py`.
+- Pruebas unitarias para `EventSubscriber` (`tests/test_event_subscriber.py`) y `mic_daemon.py` (`tests/test_mic_daemon.py`).
+
+### Cambiado
+
+- Refactorizado `src/mic_daemon.py` para ejecutarse sobre el bucle de eventos `asyncio` respondiendo a eventos NATS.
+- Actualizados `scripts/mic-start.sh` y `scripts/mic-stop.sh` delegando exclusivamente en `novactl start-capture` y `novactl stop-capture`.
+- Actualizada la descripción de `systemd/mic-daemon.service` indicando el control mediante el bus de eventos NATS.
+- Actualizada la documentación en `README.md`.
+
+### Eliminado
+
+- Módulo `src/state_watcher.py` y pruebas `tests/test_state_watcher.py`.
+- Lógica de supervisión y manipulación del archivo de estado `/tmp/voice_assistant/recording.flag`.
+- Parámetro de configuración `MIC_POLL_INTERVAL_MS` y `poll_interval_s`.
+
+### Corregido
+
+- Añadida la declaración de dependencias de `nova-event-bus`, `novactl` y `pytest-asyncio` en `requirements.txt` para solucionar errores de importación en CI.
+
 
 ## [1.1.0] - 2026-07-22
 

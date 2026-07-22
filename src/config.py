@@ -20,13 +20,7 @@ class Config:
     device: str | int | None
     sample_rate: int
     channels: int
-    poll_interval_s: float
-
-    # Derived constant — not configurable
-    flag_path: Path = field(
-        default=Path("/tmp/voice_assistant/recording.flag"),
-        init=False,
-    )
+    nats_url: str = "nats://localhost:4222"
 
 
 def load_config() -> Config:
@@ -75,20 +69,13 @@ def load_config() -> Config:
             f"MIC_CHANNELS must be 1 (mono) or 2 (stereo), got: '{raw_channels}'"
         )
 
-    raw_poll_ms = os.environ.get("MIC_POLL_INTERVAL_MS", "100").strip()
-    try:
-        poll_interval_s = int(raw_poll_ms) / 1000.0
-        if poll_interval_s <= 0:
-            raise ValueError
-    except ValueError:
-        raise ValueError(
-            f"MIC_POLL_INTERVAL_MS must be a positive integer, got: '{raw_poll_ms}'"
-        )
+    raw_nats_url = os.environ.get("NATS_URL", "nats://localhost:4222").strip()
+    nats_url = raw_nats_url if raw_nats_url else "nats://localhost:4222"
 
     return Config(
         output_dir=output_dir,
         device=device,
         sample_rate=sample_rate,
         channels=channels,
-        poll_interval_s=poll_interval_s,
+        nats_url=nats_url,
     )

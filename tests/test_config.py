@@ -32,7 +32,7 @@ class TestLoadConfig:
         monkeypatch.delenv("MIC_DEVICE", raising=False)
         monkeypatch.delenv("MIC_SAMPLE_RATE", raising=False)
         monkeypatch.delenv("MIC_CHANNELS", raising=False)
-        monkeypatch.delenv("MIC_POLL_INTERVAL_MS", raising=False)
+        monkeypatch.delenv("NATS_URL", raising=False)
 
         cfg = load_config()
 
@@ -40,7 +40,7 @@ class TestLoadConfig:
         assert cfg.device is None
         assert cfg.sample_rate == 16000
         assert cfg.channels == 1
-        assert cfg.poll_interval_s == pytest.approx(0.1)
+        assert cfg.nats_url == "nats://localhost:4222"
 
     def test_device_numeric_index(self, monkeypatch, tmp_path):
         """A numeric MIC_DEVICE should be parsed as int."""
@@ -95,29 +95,14 @@ class TestLoadConfig:
 
         assert cfg.channels == 2
 
-    def test_custom_poll_interval(self, monkeypatch, tmp_path):
-        """MIC_POLL_INTERVAL_MS should be converted to seconds."""
+    def test_custom_nats_url(self, monkeypatch, tmp_path):
+        """NATS_URL environment variable should override default."""
         monkeypatch.setenv("MIC_OUTPUT_DIR", str(tmp_path))
-        monkeypatch.setenv("MIC_POLL_INTERVAL_MS", "250")
+        monkeypatch.setenv("NATS_URL", "nats://192.168.1.50:4222")
 
         cfg = load_config()
 
-        assert cfg.poll_interval_s == pytest.approx(0.25)
-
-    def test_invalid_poll_interval_raises(self, monkeypatch, tmp_path):
-        """A non-integer MIC_POLL_INTERVAL_MS must raise ValueError."""
-        monkeypatch.setenv("MIC_OUTPUT_DIR", str(tmp_path))
-        monkeypatch.setenv("MIC_POLL_INTERVAL_MS", "abc")
-
-        with pytest.raises(ValueError, match="MIC_POLL_INTERVAL_MS"):
-            load_config()
-
-    def test_flag_path_is_fixed(self, monkeypatch, tmp_path):
-        """The flag path should always point to the documented location."""
-        monkeypatch.setenv("MIC_OUTPUT_DIR", str(tmp_path))
-        cfg = load_config()
-
-        assert str(cfg.flag_path) == "/tmp/voice_assistant/recording.flag"
+        assert cfg.nats_url == "nats://192.168.1.50:4222"
 
     def test_output_dir_created_if_missing(self, monkeypatch, tmp_path):
         """load_config() must create MIC_OUTPUT_DIR if it does not exist."""

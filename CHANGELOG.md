@@ -38,6 +38,11 @@ Los cambios se agrupan en las siguientes categorías:
 - Lógica de supervisión y manipulación del archivo de estado `/tmp/voice_assistant/recording.flag`.
 - Parámetro de configuración `MIC_POLL_INTERVAL_MS` y `poll_interval_s`.
 
+### Corregido
+
+- Añadida la declaración de dependencias de `nova-event-bus`, `novactl` y `pytest-asyncio` en `requirements.txt` para solucionar errores de importación en CI.
+
+
 ## [1.1.0] - 2026-07-22
 
 ### Añadido

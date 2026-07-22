@@ -1,5 +1,5 @@
 [Unit]
-Description=Microphone recording daemon controlled by filesystem flag
+Description=Microphone recording daemon controlled by NATS event bus
 Documentation=https://github.com/danuser2018/mic-daemon
 After=default.target pipewire.service pipewire-pulse.service
 

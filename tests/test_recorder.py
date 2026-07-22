@@ -51,7 +51,6 @@ def config(tmp_path):
         device=None,
         sample_rate=16000,
         channels=1,
-        poll_interval_s=0.1,
     )
 
 

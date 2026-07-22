@@ -19,11 +19,18 @@ Los cambios se agrupan en las siguientes categorías:
 
 ---
 
-## Sin publicar
+## [1.1.0] - 2026-07-22
 
 ### Añadido
 
+- Invocación no bloqueante a `novactl start-capture` en `scripts/mic-start.sh` y `novactl stop-capture` en `scripts/mic-stop.sh` para iniciar la migración desde archivos de marca hacia eventos NATS.
+- Documento de refinamiento técnico `doc/refinements/mic_scripts_novactl_integration_refinement.md`.
+- Suite de pruebas de integración para scripts shell en `tests/test_scripts.py`.
 - Nueva carpeta `.agents/skills` con la información necesaria para implementación por IA.
+
+### Cambiado
+
+- Actualizada la documentación en `README.md` reflejando la invocación híbrida de `novactl` en los scripts de control.
 
 ### Corregido
 

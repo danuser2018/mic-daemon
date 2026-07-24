@@ -137,8 +137,9 @@ El daemon opera con tres estados internos bien definidos:
 5. Cerrar stream de audio
 6. Generar nombre de archivo: timestamp ISO-like  →  2026-05-31_21-45-10.wav
 7. Escribir buffer a disco con soundfile.write() si duración >= 0.1s
-8. Limpiar buffer en memoria
-9. mic-daemon: STOPPING → IDLE
+8. Publicar SpeechCapturedEvent en NATS (subject: event.speech.captured)
+9. Limpiar buffer en memoria
+10. mic-daemon: STOPPING → IDLE
 ```
 
 ---
@@ -149,8 +150,8 @@ El daemon opera con tres estados internos bien definidos:
 
 | Entrada | Tipo | Descripción |
 |---|---|---|
-| `StartSpeechCaptureCommand` | Evento NATS | Subcomando `novactl.command.start_speech_capture` (evento sin parámetros; invoca callback `on_start: Callable[[], None]`) |
-| `StopSpeechCaptureCommand` | Evento NATS | Subcomando `novactl.command.stop_speech_capture` (evento sin parámetros; invoca callback `on_stop: Callable[[], None]`) |
+| `StartSpeechCaptureCommand` | Evento NATS | Subject `command.speech.start-capture` (evento sin parámetros; invoca callback `on_start: Callable[[], None]`) |
+| `StopSpeechCaptureCommand` | Evento NATS | Subject `command.speech.stop-capture` (evento sin parámetros; invoca callback `on_stop: Callable[[], None]`) |
 | `$MIC_OUTPUT_DIR` | Variable de entorno | Directorio destino de archivos WAV |
 | `$NATS_URL` | Variable de entorno (opcional) | URL del broker NATS (por defecto: `nats://localhost:4222`) |
 | `$MIC_DEVICE` | Variable de entorno (opcional) | Índice o nombre del dispositivo de audio |
@@ -162,6 +163,7 @@ El daemon opera con tres estados internos bien definidos:
 | Salida | Tipo | Descripción |
 |---|---|---|
 | `$MIC_OUTPUT_DIR/YYYY-MM-DD_HH-MM-SS.wav` | Archivo WAV | Grabación de audio completa |
+| `SpeechCapturedEvent` | Evento NATS | Subject `event.speech.captured` (contiene `correlation_id`, `channel='voice'`, `audio_path` relativo) |
 | `journalctl --user -u mic-daemon` | Log systemd | Logs de operación, errores y eventos |
 
 ---
@@ -194,6 +196,8 @@ mic-daemon/
 │   ├── mic_daemon.py            # Punto de entrada principal del daemon (asyncio)
 │   ├── recorder.py              # Lógica de captura y escritura de audio
 │   ├── event_subscriber.py      # Gestor de suscripciones a eventos NATS
+│   ├── event_publisher.py       # Publicador de eventos de dominio (SpeechCapturedEvent)
+│   ├── events.py                # Definición de clases de comandos y eventos NATS
 │   └── config.py                # Carga y validación de variables de entorno
 │
 ├── scripts/
@@ -206,6 +210,8 @@ mic-daemon/
 └── tests/
     ├── test_recorder.py
     ├── test_event_subscriber.py
+    ├── test_event_publisher.py
+    ├── test_events.py
     ├── test_mic_daemon.py
     ├── test_scripts.py
     └── test_config.py

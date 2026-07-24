@@ -4,7 +4,8 @@ mic_daemon.py — Entry point for the mic-daemon systemd user service.
 Orchestrates:
   1. config — loads and validates environment variables
   2. recorder — manages audio capture and WAV writing
-  3. event_subscriber — subscribes to NATS speech capture commands
+  3. event_publisher — publishes domain events (SpeechCapturedEvent) to NATS
+  4. event_subscriber — subscribes to NATS speech capture commands
 
 Shutdown behaviour:
   - systemd sends SIGTERM on `systemctl --user stop mic-daemon`.
@@ -17,6 +18,7 @@ import signal
 import sys
 from nova_event_bus import EventBus
 from src.config import load_config
+from src.event_publisher import EventPublisher
 from src.event_subscriber import EventSubscriber
 from src.recorder import Recorder, build_output_path
 
@@ -50,13 +52,22 @@ async def main_async() -> None:
 
     recorder = Recorder(config)
     event_bus = EventBus()
+    publisher = EventPublisher(event_bus)
 
     def on_start() -> None:
         output_path = build_output_path(config.output_dir)
         recorder.start(output_path)
 
     def on_stop() -> None:
-        recorder.stop()
+        rel_path, correlation_id = recorder.stop()
+        if rel_path and correlation_id:
+            asyncio.create_task(
+                publisher.publish_speech_captured(
+                    correlation_id=correlation_id,
+                    channel="voice",
+                    audio_path=rel_path,
+                )
+            )
 
     subscriber = EventSubscriber(
         event_bus=event_bus,
@@ -77,7 +88,13 @@ async def main_async() -> None:
 
     # Graceful cleanup
     if recorder.is_recording():
-        recorder.stop()
+        rel_path, correlation_id = recorder.stop()
+        if rel_path and correlation_id:
+            await publisher.publish_speech_captured(
+                correlation_id=correlation_id,
+                channel="voice",
+                audio_path=rel_path,
+            )
     await subscriber.stop()
     logger.info("mic-daemon shut down cleanly")
 

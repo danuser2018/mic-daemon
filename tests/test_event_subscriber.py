@@ -5,7 +5,7 @@ test_event_subscriber.py — Unit tests for src/event_subscriber.py.
 from unittest.mock import AsyncMock, MagicMock
 import pytest
 
-from novactl.events import StartSpeechCaptureCommand, StopSpeechCaptureCommand
+from src.events import StartSpeechCaptureCommand, StopSpeechCaptureCommand
 from src.event_subscriber import EventSubscriber
 
 

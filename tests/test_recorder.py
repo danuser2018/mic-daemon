@@ -22,6 +22,7 @@ Note on the mocking strategy:
 """
 
 import sys
+import uuid
 from unittest.mock import MagicMock, patch
 
 # ── MUST come before any import of src.recorder or @patch decorators ─────────
@@ -103,15 +104,20 @@ class TestRecorderStart:
             callback=recorder._audio_callback,
         )
         mock_stream.start.assert_called_once()
+        assert recorder._correlation_id is not None
+        uuid_obj = uuid.UUID(recorder._correlation_id)
+        assert str(uuid_obj) == recorder._correlation_id
 
     def test_double_start_is_ignored(self, recorder, tmp_path):
         """Calling start() twice should not open a second stream."""
         _fake_sounddevice.InputStream.return_value = MagicMock()
 
         recorder.start(tmp_path / "first.wav")
+        first_cid = recorder._correlation_id
         recorder.start(tmp_path / "second.wav")
 
         assert _fake_sounddevice.InputStream.call_count == 1
+        assert recorder._correlation_id == first_cid
 
     def test_start_failure_leaves_recorder_idle(self, recorder, tmp_path):
         """If InputStream raises, the recorder should remain in idle state."""
@@ -122,25 +128,30 @@ class TestRecorderStart:
         # Should not raise; stream and buffer should be reset
         assert recorder._stream is None
         assert recorder._buffer == []
+        assert recorder._correlation_id is None
 
 
 class TestRecorderStop:
-    def test_writes_wav_on_stop(self, recorder, config, tmp_path):
-        """stop() should concatenate the buffer and call soundfile.write."""
+    def test_writes_wav_on_stop_and_returns_relative_path_and_cid(self, recorder, config, tmp_path):
+        """stop() should concatenate the buffer, call soundfile.write and return relative path and cid."""
         mock_stream = MagicMock()
         _fake_sounddevice.InputStream.return_value = mock_stream
 
         output_path = tmp_path / "out.wav"
         recorder.start(output_path)
+        cid = recorder._correlation_id
 
         # Simulate captured frames (2 seconds of audio)
         recorder._buffer = _make_frames(config.sample_rate, 2.0)
 
-        recorder.stop()
+        rel_path, ret_cid = recorder.stop()
 
         mock_stream.stop.assert_called_once()
         mock_stream.close.assert_called_once()
         _fake_soundfile.write.assert_called_once()
+
+        assert rel_path == "out.wav"
+        assert ret_cid == cid
 
         # Verify the correct path and samplerate were used
         _, kwargs = _fake_soundfile.write.call_args
@@ -149,34 +160,40 @@ class TestRecorderStop:
         assert kwargs.get("subtype") == "PCM_16"
 
     def test_no_wav_written_when_buffer_empty(self, recorder, tmp_path):
-        """stop() with an empty buffer must NOT call soundfile.write."""
+        """stop() with an empty buffer must NOT call soundfile.write and return (None, None)."""
         _fake_sounddevice.InputStream.return_value = MagicMock()
 
         recorder.start(tmp_path / "out.wav")
         recorder._buffer = []  # no frames captured
 
-        recorder.stop()
+        rel_path, cid = recorder.stop()
 
         _fake_soundfile.write.assert_not_called()
+        assert rel_path is None
+        assert cid is None
 
     def test_no_wav_written_when_too_short(self, recorder, config, tmp_path):
-        """stop() with a recording shorter than MIN_DURATION_S must discard it."""
+        """stop() with a recording shorter than MIN_DURATION_S must discard it and return (None, None)."""
         _fake_sounddevice.InputStream.return_value = MagicMock()
 
         recorder.start(tmp_path / "out.wav")
         # Extremely short — below MIN_DURATION_S
         recorder._buffer = _make_frames(config.sample_rate, MIN_DURATION_S * 0.5)
 
-        recorder.stop()
+        rel_path, cid = recorder.stop()
 
         _fake_soundfile.write.assert_not_called()
+        assert rel_path is None
+        assert cid is None
 
     def test_stop_without_start_is_ignored(self, recorder):
-        """Calling stop() when not recording should not raise."""
-        recorder.stop()  # Should be a no-op
+        """Calling stop() when not recording should return (None, None)."""
+        rel_path, cid = recorder.stop()
+        assert rel_path is None
+        assert cid is None
 
     def test_buffer_cleared_after_stop(self, recorder, config, tmp_path):
-        """After stop(), the buffer should be empty and output_path None."""
+        """After stop(), the buffer should be empty and output_path/correlation_id None."""
         _fake_sounddevice.InputStream.return_value = MagicMock()
 
         recorder.start(tmp_path / "out.wav")
@@ -185,6 +202,20 @@ class TestRecorderStop:
 
         assert recorder._buffer == []
         assert recorder._output_path is None
+        assert recorder._correlation_id is None
+
+    def test_stop_returns_none_on_write_exception(self, recorder, config, tmp_path):
+        """If sf.write raises, stop() logs error and returns (None, None)."""
+        _fake_sounddevice.InputStream.return_value = MagicMock()
+        _fake_soundfile.write.side_effect = OSError("Disk full")
+
+        recorder.start(tmp_path / "out.wav")
+        recorder._buffer = _make_frames(config.sample_rate, 2.0)
+
+        rel_path, cid = recorder.stop()
+
+        assert rel_path is None
+        assert cid is None
 
 
 class TestAudioCallback:

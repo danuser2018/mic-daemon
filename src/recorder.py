@@ -18,9 +18,10 @@ Design decisions:
 """
 
 import logging
+import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
 
@@ -40,7 +41,7 @@ class Recorder:
     Lifecycle:
         recorder = Recorder(config)
         recorder.start(output_filename)   # opens stream, begins capture
-        recorder.stop()                   # closes stream, writes WAV
+        rel_path, correlation_id = recorder.stop() # closes stream, writes WAV
     """
 
     def __init__(self, config: "Config") -> None:
@@ -48,6 +49,7 @@ class Recorder:
         self._stream: Any = None  # sounddevice.InputStream at runtime
         self._buffer: list[np.ndarray] = []
         self._output_path: Path | None = None
+        self._correlation_id: str | None = None
 
     # ------------------------------------------------------------------
     # Public API
@@ -76,6 +78,7 @@ class Recorder:
 
         self._buffer = []
         self._output_path = output_path
+        self._correlation_id = str(uuid.uuid4())
         cfg = self._config
 
         try:
@@ -87,20 +90,25 @@ class Recorder:
                 callback=self._audio_callback,
             )
             self._stream.start()
-            logger.info("Recording started → %s", output_path)
+            logger.info("Recording started → %s (correlation_id=%s)", output_path, self._correlation_id)
         except Exception:
             logger.exception("Failed to open audio stream")
             self._stream = None
             self._buffer = []
             self._output_path = None
+            self._correlation_id = None
 
-    def stop(self) -> None:
+    def stop(self) -> tuple[Optional[str], Optional[str]]:
         """
         Stop capture, flush the buffer to disk as a WAV file and reset state.
+
+        Returns:
+            Tuple of (relative_audio_path, correlation_id) if WAV was saved successfully,
+            or (None, None) if recording was discarded or failed.
         """
         if self._stream is None:
             logger.warning("stop() called while not recording — ignoring")
-            return
+            return None, None
 
         try:
             self._stream.stop()
@@ -110,7 +118,7 @@ class Recorder:
         finally:
             self._stream = None
 
-        self._write_buffer()
+        return self._write_buffer()
 
     # ------------------------------------------------------------------
     # Private helpers
@@ -130,11 +138,13 @@ class Recorder:
         # Append a copy so the original buffer is not mutated after the call
         self._buffer.append(indata.copy())
 
-    def _write_buffer(self) -> None:
+    def _write_buffer(self) -> tuple[Optional[str], Optional[str]]:
         """Concatenate frames and write WAV to disk, then clear the buffer."""
         if not self._buffer:
             logger.info("Buffer is empty — no WAV file written")
-            return
+            self._output_path = None
+            self._correlation_id = None
+            return None, None
 
         audio = np.concatenate(self._buffer, axis=0)
         duration_s = len(audio) / self._config.sample_rate
@@ -147,11 +157,14 @@ class Recorder:
             )
             self._buffer = []
             self._output_path = None
-            return
+            self._correlation_id = None
+            return None, None
 
         if self._output_path is None:
             logger.error("No output path set — cannot write WAV")
-            return
+            self._buffer = []
+            self._correlation_id = None
+            return None, None
 
         # Lazy import — same rationale as in start()
         import soundfile as sf  # noqa: PLC0415
@@ -169,11 +182,16 @@ class Recorder:
                 duration_s,
                 len(audio),
             )
+            rel_path = str(self._output_path.relative_to(self._config.output_dir))
+            cid = self._correlation_id
+            return rel_path, cid
         except Exception:
             logger.exception("Failed to write WAV file: %s", self._output_path)
+            return None, None
         finally:
             self._buffer = []
             self._output_path = None
+            self._correlation_id = None
 
 
 def build_output_path(output_dir: Path) -> Path:

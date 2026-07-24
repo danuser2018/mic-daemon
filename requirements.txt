@@ -5,4 +5,4 @@ pytest>=8.0.0
 pytest-cov>=5.0.0
 pytest-asyncio>=0.23.0
 nova-event-bus @ git+https://github.com/danuser2018/nova-event-bus.git@1.1.0
-novactl @ git+https://github.com/danuser2018/novactl.git@1.1.0
+novactl @ git+https://github.com/danuser2018/novactl.git@1.2.0

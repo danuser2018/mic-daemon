@@ -5,7 +5,7 @@ event_subscriber.py — Subscribes to NATS speech capture commands for mic-daemo
 import logging
 from typing import Callable
 from nova_event_bus import EventBus
-from novactl.events import StartSpeechCaptureCommand, StopSpeechCaptureCommand
+from src.events import StartSpeechCaptureCommand, StopSpeechCaptureCommand
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class EventSubscriber:
         await self._event_bus.subscribe(StartSpeechCaptureCommand, self._handle_start)
         await self._event_bus.subscribe(StopSpeechCaptureCommand, self._handle_stop)
         logger.info(
-            "EventSubscriber subscribed to StartSpeechCaptureCommand and StopSpeechCaptureCommand"
+            "Subscribed to command.speech.start-capture and command.speech.stop-capture"
         )
 
     async def stop(self) -> None:

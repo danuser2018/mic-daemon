@@ -17,6 +17,21 @@ Los cambios se agrupan en las siguientes categorías:
 - **Corregido** — corrección de errores.
 - **Seguridad** — correcciones de vulnerabilidades.
 
+## [1.4.0]
+
+### Añadido
+
+- Módulo `src/events.py` con definiciones locales autónomas de `StartSpeechCaptureCommand` (`command.speech.start-capture`), `StopSpeechCaptureCommand` (`command.speech.stop-capture`), `SpeechCapturedEvent` (`event.speech.captured`) y `ResponseGeneratedEvent` (`event.interaction.response-generated`).
+- Módulo `src/event_publisher.py` para la publicación asíncrona de `SpeechCapturedEvent`.
+- Pruebas unitarias para `src/events.py` y `src/event_publisher.py`.
+
+### Cambiado
+
+- Actualizado `EventSubscriber` para suscribirse a los subjects `command.speech.start-capture` y `command.speech.stop-capture`.
+- Actualizado `Recorder` para generar un `correlation_id` (UUIDv4) en `start()` y retornar `(rel_path, correlation_id)` en `stop()`.
+- Integrado `EventPublisher` en la orquestación de `src/mic_daemon.py`.
+- Actualizada la versión de la dependencia `novactl` a `1.2.0` en `requirements.txt`.
+
 ## [1.3.0] - 2026-07-24
 
 ### Cambiado
@@ -24,7 +39,7 @@ Los cambios se agrupan en las siguientes categorías:
 - Simplificación de las firmas de callback `on_start` y `on_stop` a `Callable[[], None]` en `EventSubscriber` y `mic_daemon.py`.
 - Eliminación de la referencia a `event.correlation_id` en los handlers `_handle_start` y `_handle_stop` de `EventSubscriber`.
 
-## [1.2.0] - 2027-07-22
+## [1.2.0] - 2026-07-22
 
 ### Añadido
 

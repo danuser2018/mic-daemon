@@ -51,11 +51,11 @@ async def main_async() -> None:
     recorder = Recorder(config)
     event_bus = EventBus()
 
-    def on_start(correlation_id: str) -> None:
+    def on_start() -> None:
         output_path = build_output_path(config.output_dir)
         recorder.start(output_path)
 
-    def on_stop(correlation_id: str) -> None:
+    def on_stop() -> None:
         recorder.stop()
 
     subscriber = EventSubscriber(

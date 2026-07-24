@@ -56,10 +56,10 @@ async def test_handle_start_triggers_callback():
         on_stop=on_stop,
     )
 
-    cmd = StartSpeechCaptureCommand(correlation_id="test-start-123")
+    cmd = StartSpeechCaptureCommand()
     await subscriber._handle_start(cmd)
 
-    on_start.assert_called_once_with("test-start-123")
+    on_start.assert_called_once_with()
     on_stop.assert_not_called()
 
 
@@ -75,8 +75,8 @@ async def test_handle_stop_triggers_callback():
         on_stop=on_stop,
     )
 
-    cmd = StopSpeechCaptureCommand(correlation_id="test-stop-456")
+    cmd = StopSpeechCaptureCommand()
     await subscriber._handle_stop(cmd)
 
-    on_stop.assert_called_once_with("test-stop-456")
+    on_stop.assert_called_once_with()
     on_start.assert_not_called()

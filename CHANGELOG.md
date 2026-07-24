@@ -17,7 +17,14 @@ Los cambios se agrupan en las siguientes categorías:
 - **Corregido** — corrección de errores.
 - **Seguridad** — correcciones de vulnerabilidades.
 
-## [1.2.0]
+## [1.3.0] - 2026-07-24
+
+### Cambiado
+
+- Simplificación de las firmas de callback `on_start` y `on_stop` a `Callable[[], None]` en `EventSubscriber` y `mic_daemon.py`.
+- Eliminación de la referencia a `event.correlation_id` en los handlers `_handle_start` y `_handle_stop` de `EventSubscriber`.
+
+## [1.2.0] - 2027-07-22
 
 ### Añadido
 

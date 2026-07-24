@@ -72,7 +72,7 @@ Flujo:
 mic-start
     │
     ▼
-novactl start-speech-capture
+novactl start-capture
 ```
 
 ## mic-stop
@@ -83,7 +83,7 @@ Flujo:
 mic-stop
     │
     ▼
-novactl stop-speech-capture
+novactl stop-capture
 ```
 
 Su única responsabilidad será delegar la publicación del comando en `novactl`.
@@ -123,7 +123,7 @@ Este cambio constituye el primer paso en la transición hacia una arquitectura c
 - `mic-daemon` inicia la captura al recibir `StartSpeechCaptureCommand`.
 - `mic-daemon` finaliza la captura al recibir `StopSpeechCaptureCommand`.
 - `mic-daemon` deja de observar `recording.flag`.
-- `mic-start` únicamente invoca `novactl start-speech-capture`.
-- `mic-stop` únicamente invoca `novactl stop-speech-capture`.
+- `mic-start` únicamente invoca `novactl start-capture`.
+- `mic-stop` únicamente invoca `novactl stop-capture`.
 - El comportamiento observable de Nova permanece inalterado.
 

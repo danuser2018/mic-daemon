@@ -48,10 +48,10 @@ async def test_main_async_normal_lifecycle(monkeypatch, tmp_path):
         on_stop = call_kwargs["on_stop"]
 
         # Call callbacks to verify integration with recorder
-        on_start("corr-1")
+        on_start()
         mock_recorder.start.assert_called_once()
 
-        on_stop("corr-2")
+        on_stop()
         mock_recorder.stop.assert_called_once()
 
         # Now cancel the task to simulate shutdown

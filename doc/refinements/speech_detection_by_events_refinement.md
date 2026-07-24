@@ -123,14 +123,12 @@ from nova_event_bus import Event, event
 @event("novactl.command.start_speech_capture")
 @dataclass
 class StartSpeechCaptureCommand(Event):
-    correlation_id: str
-    channel: str = "voice"
+    pass
 
 @event("novactl.command.stop_speech_capture")
 @dataclass
 class StopSpeechCaptureCommand(Event):
-    correlation_id: str
-    channel: str = "voice"
+    pass
 ```
 
 ### 4.2 Arquitectura del Suscriptor de Eventos (`src/event_subscriber.py`)
@@ -154,8 +152,8 @@ class EventSubscriber:
     def __init__(
         self,
         event_bus: EventBus,
-        on_start: Callable[[str], None],
-        on_stop: Callable[[str], None],
+        on_start: Callable[[], None],
+        on_stop: Callable[[], None],
     ) -> None:
         self._event_bus = event_bus
         self._on_start = on_start
@@ -174,12 +172,12 @@ class EventSubscriber:
         logger.info("EventSubscriber disconnected from NATS")
 
     async def _handle_start(self, event: StartSpeechCaptureCommand) -> None:
-        logger.info("Handling StartSpeechCaptureCommand (correlation_id=%s)", event.correlation_id)
-        self._on_start(event.correlation_id)
+        logger.info("Handling StartSpeechCaptureCommand")
+        self._on_start()
 
     async def _handle_stop(self, event: StopSpeechCaptureCommand) -> None:
-        logger.info("Handling StopSpeechCaptureCommand (correlation_id=%s)", event.correlation_id)
-        self._on_stop(event.correlation_id)
+        logger.info("Handling StopSpeechCaptureCommand")
+        self._on_stop()
 ```
 
 ### 4.3 Actualización de Configuración (`src/config.py`)
@@ -217,11 +215,11 @@ async def main_async() -> None:
     recorder = Recorder(config)
     event_bus = EventBus()
 
-    def on_start(correlation_id: str) -> None:
+    def on_start() -> None:
         output_path = build_output_path(config.output_dir)
         recorder.start(output_path)
 
-    def on_stop(correlation_id: str) -> None:
+    def on_stop() -> None:
         recorder.stop()
 
     subscriber = EventSubscriber(

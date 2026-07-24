@@ -149,8 +149,8 @@ El daemon opera con tres estados internos bien definidos:
 
 | Entrada | Tipo | Descripción |
 |---|---|---|
-| `StartSpeechCaptureCommand` | Evento NATS | Subcomando `novactl.command.start_speech_capture` |
-| `StopSpeechCaptureCommand` | Evento NATS | Subcomando `novactl.command.stop_speech_capture` |
+| `StartSpeechCaptureCommand` | Evento NATS | Subcomando `novactl.command.start_speech_capture` (evento sin parámetros; invoca callback `on_start: Callable[[], None]`) |
+| `StopSpeechCaptureCommand` | Evento NATS | Subcomando `novactl.command.stop_speech_capture` (evento sin parámetros; invoca callback `on_stop: Callable[[], None]`) |
 | `$MIC_OUTPUT_DIR` | Variable de entorno | Directorio destino de archivos WAV |
 | `$NATS_URL` | Variable de entorno (opcional) | URL del broker NATS (por defecto: `nats://localhost:4222`) |
 | `$MIC_DEVICE` | Variable de entorno (opcional) | Índice o nombre del dispositivo de audio |

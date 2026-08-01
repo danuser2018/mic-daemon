@@ -1,7 +1,7 @@
 # Documento de Refinamiento: Integración de novactl en Scripts de Captura de Micrófono (mic-start / mic-stop)
 
 - **Documento / Solicitud de Origen**: Refactorización de entrada basada en eventos mediante `novactl` (Integración en `mic-start.sh` y `mic-stop.sh`)
-- **Estado**: Refinado / Listo para revisión de DoR
+- **Estado**: Superado — scripts eliminados, novactl es el único punto de entrada CLI (2026-08-02)
 
 ---
 

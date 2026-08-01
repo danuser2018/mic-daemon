@@ -17,7 +17,15 @@ Los cambios se agrupan en las siguientes categorías:
 - **Corregido** — corrección de errores.
 - **Seguridad** — correcciones de vulnerabilidades.
 
-## [1.4.0]
+## [1.5.0] - 2026-08-02
+
+### Eliminado
+
+- Eliminados los scripts legacy de control de micrófono `scripts/mic-start.sh`, `scripts/mic-stop.sh` y `scripts/mic-toggle.sh`.
+- Eliminadas las pruebas de integración `tests/test_scripts.py`.
+- Toda interacción CLI con el control del micrófono se realiza ahora directamente mediante la CLI `novactl` (`novactl start-capture` / `novactl stop-capture`).
+
+## [1.4.0] - 2026-07-28
 
 ### Añadido
 

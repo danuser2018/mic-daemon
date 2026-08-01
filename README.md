@@ -50,7 +50,6 @@ El principio central de diseño es **comunicación orientada a eventos pura**: e
 │        │                                                        │
 │        ▼                                                        │
 │   novactl (start-capture / stop-capture)                        │
-│   o scripts de control: mic-start.sh / mic-stop.sh             │
 │        │                                                        │
 │        ▼                                                        │
 │   NATS Event Bus (nova-event-bus)                               │
@@ -70,7 +69,7 @@ El principio central de diseño es **comunicación orientada a eventos pura**: e
 
 | Componente | Responsabilidad |
 |---|---|
-| `novactl` / `scripts` | Emite comandos NATS `StartSpeechCaptureCommand` y `StopSpeechCaptureCommand` |
+| `novactl` | Emite comandos NATS `StartSpeechCaptureCommand` y `StopSpeechCaptureCommand` |
 | `nova-event-bus` | Librería común de mensajería asíncrona sobre NATS |
 | `mic-daemon` | Proceso Python con `EventSubscriber` que gestiona la grabación |
 | `$MIC_OUTPUT_DIR` | Directorio de salida de archivos WAV (configurable) |
@@ -119,7 +118,7 @@ El daemon opera con tres estados internos bien definidos:
 ### Inicio de grabación
 
 ```
-1. Hotkey o comando ejecutado (ej: novactl start-capture o mic-start.sh)
+1. Hotkey o comando ejecutado (ej: novactl start-capture)
 2. Se publica StartSpeechCaptureCommand en NATS
 3. EventSubscriber en mic-daemon recibe el evento
 4. mic-daemon: IDLE → RECORDING
@@ -130,7 +129,7 @@ El daemon opera con tres estados internos bien definidos:
 ### Fin de grabación
 
 ```
-1. Hotkey o comando ejecutado (ej: novactl stop-capture o mic-stop.sh)
+1. Hotkey o comando ejecutado (ej: novactl stop-capture)
 2. Se publica StopSpeechCaptureCommand en NATS
 3. EventSubscriber en mic-daemon recibe el evento
 4. mic-daemon: RECORDING → STOPPING
@@ -173,11 +172,11 @@ El daemon opera con tres estados internos bien definidos:
 ### Modo Push-to-Talk / Command-driven
 
 ```bash
-# Al presionar / ejecutar -> invoca novactl start-capture
-mic-start.sh
+# Al presionar la tecla configurada -> inicia captura
+novactl start-capture
 
-# Al soltar / ejecutar -> invoca novactl stop-capture
-mic-stop.sh
+# Al soltar / volver a pulsar -> detiene captura
+novactl stop-capture
 ```
 
 ---
@@ -200,10 +199,6 @@ mic-daemon/
 │   ├── events.py                # Definición de clases de comandos y eventos NATS
 │   └── config.py                # Carga y validación de variables de entorno
 │
-├── scripts/
-│   ├── mic-start.sh             # Script de control (invoca novactl start-capture)
-│   └── mic-stop.sh              # Script de control (invoca novactl stop-capture)
-│
 ├── systemd/
 │   └── mic-daemon.service       # Unidad de servicio systemd --user
 │
@@ -213,9 +208,17 @@ mic-daemon/
     ├── test_event_publisher.py
     ├── test_events.py
     ├── test_mic_daemon.py
-    ├── test_scripts.py
     └── test_config.py
 ```
+
+---
+
+## Integración con hotkeys
+
+Para integrar la captura de audio con los atajos de teclado del entorno de escritorio de Linux, asigna las ejecuciones directas del CLI `novactl`:
+
+- **Iniciar captura:** `novactl start-capture`
+- **Detener captura:** `novactl stop-capture`
 
 ---
 

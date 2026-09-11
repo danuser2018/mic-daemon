@@ -17,7 +17,7 @@ Los cambios se agrupan en las siguientes categorías:
 - **Corregido** — corrección de errores.
 - **Seguridad** — correcciones de vulnerabilidades.
 
-## [Sin publicar]
+## [1.6.0] - 2026-09-11
 
 ### Eliminado
 

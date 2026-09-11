@@ -17,6 +17,12 @@ Los cambios se agrupan en las siguientes categorías:
 - **Corregido** — corrección de errores.
 - **Seguridad** — correcciones de vulnerabilidades.
 
+## [1.6.0] - 2026-09-11
+
+### Eliminado
+
+- Eliminada la definición huérfana de `ResponseGeneratedEvent` en `src/events.py` y sus pruebas asociadas en `tests/test_events.py`, al ser un evento no utilizado por este daemon.
+
 ## [1.5.0] - 2026-08-02
 
 ### Eliminado

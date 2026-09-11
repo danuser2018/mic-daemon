@@ -4,7 +4,6 @@ from src.events import (
     StartSpeechCaptureCommand,
     StopSpeechCaptureCommand,
     SpeechCapturedEvent,
-    ResponseGeneratedEvent,
 )
 
 
@@ -18,7 +17,3 @@ def test_stop_speech_capture_command_subject():
 
 def test_speech_captured_event_subject():
     assert get_subject_for_event(SpeechCapturedEvent) == "event.speech.captured"
-
-
-def test_response_generated_event_subject():
-    assert get_subject_for_event(ResponseGeneratedEvent) == "event.interaction.response-generated"
